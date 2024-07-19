@@ -1,5 +1,6 @@
 package com.T82.review.domain.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -22,11 +23,13 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-    private User userId;
+//    @JsonBackReference
+    private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EVENT_INFO_ID", nullable = false)
-    private EventInfo eventInfoId;
+//    @JsonBackReference
+    private EventInfo eventInfo;
 
     @Column(name = "CONTENT")
     private String content;

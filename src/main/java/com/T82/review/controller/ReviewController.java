@@ -1,16 +1,14 @@
 package com.T82.review.controller;
 
 import com.T82.review.domain.dto.request.AddReviewRequest;
+import com.T82.review.domain.dto.response.ReviewResponse;
 import com.T82.review.global.utils.TokenInfo;
 import com.T82.review.service.ReviewService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequiredArgsConstructor
@@ -23,6 +21,12 @@ public class ReviewController {
                                             @Validated @RequestBody AddReviewRequest addReviewRequest) {
         reviewService.addReview(tokenInfo,addReviewRequest);
         return ResponseEntity.ok("리뷰 등록 성공");
+    }
+
+    @GetMapping("/{eventInfoId}")
+    public ReviewResponse getReview(@AuthenticationPrincipal TokenInfo tokenInfo,
+                                    @PathVariable(name = "eventInfoId") Long eventInfoId) {
+        return reviewService.getReview(tokenInfo,eventInfoId);
     }
 
 }
