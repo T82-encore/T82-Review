@@ -41,4 +41,15 @@ public class ReviewServiceImpl implements ReviewService{
         return ReviewResponse.from(review);
     }
 
+    @Override
+    public void deleteReview(TokenInfo tokenInfo, Long eventInfoId) {
+        User user = User.builder().userId(tokenInfo.id()).build();
+        EventInfo eventInfo = EventInfo.builder().eventInfoId(eventInfoId).build();
+        Review review = reviewRepository.findByUserAndEventInfo(user, eventInfo);
+        if (review == null) {
+            throw new NoReviewException("해당 이벤트에 대한 리뷰가 존재하지 않습니다.");
+        }
+        review.deleteReview();
+        reviewRepository.save(review);
+    }
 }
