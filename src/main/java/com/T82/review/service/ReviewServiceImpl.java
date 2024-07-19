@@ -12,6 +12,7 @@ import com.T82.review.global.utils.TokenInfo;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -28,6 +29,16 @@ public class ReviewServiceImpl implements ReviewService{
             throw new DuplicateReviewException("해당 이벤트에 대한 리뷰가 이미 존재합니다.");
         }
         reviewRepository.save(addReviewRequest.toEntity(user,eventInfo));
+    }
+
+    @Override
+    public List<ReviewResponse> getAllReviews(TokenInfo tokenInfo) {
+        User user = User.builder().userId(tokenInfo.id()).build();
+        List<Review> allByUser = reviewRepository.findAllByUser(user);
+        if(allByUser.isEmpty()){
+            throw new NoReviewException("해당 유저가 작성한 리뷰가 존재하지 않습니다.");
+        }
+        return allByUser.stream().map(ReviewResponse::from).toList();
     }
 
     @Override

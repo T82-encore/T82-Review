@@ -10,6 +10,8 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/v1/reviews")
@@ -21,6 +23,11 @@ public class ReviewController {
                                             @Validated @RequestBody AddReviewRequest addReviewRequest) {
         reviewService.addReview(tokenInfo,addReviewRequest);
         return ResponseEntity.ok("리뷰 등록 성공");
+    }
+
+    @GetMapping
+    public List<ReviewResponse> getAllReview(@AuthenticationPrincipal TokenInfo tokenInfo) {
+        return reviewService.getAllReviews(tokenInfo);
     }
 
     @GetMapping("/{eventInfoId}")
