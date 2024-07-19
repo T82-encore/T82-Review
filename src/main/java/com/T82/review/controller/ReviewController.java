@@ -29,4 +29,11 @@ public class ReviewController {
         return reviewService.getReview(tokenInfo,eventInfoId);
     }
 
+    @DeleteMapping("/{eventInfoId}")
+    public ResponseEntity<String> deleteReview(@AuthenticationPrincipal TokenInfo tokenInfo,
+                                               @PathVariable(name = "eventInfoId") Long eventInfoId) {
+        reviewService.deleteReview(tokenInfo,eventInfoId);
+        return ResponseEntity.ok("리뷰 삭제 성공");
+    }
+
 }

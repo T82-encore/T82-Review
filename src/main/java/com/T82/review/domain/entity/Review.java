@@ -46,5 +46,9 @@ public class Review {
     @Column(name = "CREATED_DATE", nullable = false)
     private LocalDate createdDate;
 
+    public void deleteReview() {
+        this.isDeleted = true;
+    }
+
 
 }
