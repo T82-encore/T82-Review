@@ -2,6 +2,7 @@ package com.T82.review.global;
 
 import com.T82.review.domain.dto.response.ErrorResponse;
 import com.T82.review.exception.DuplicateReviewException;
+import com.T82.review.exception.NoReviewException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -23,7 +24,14 @@ public class GlobalExceptionController {
 
     // Password 일치하지 않을때 예외 처리
     @ExceptionHandler(DuplicateReviewException.class)
-    public ResponseEntity<ErrorResponse> passwordException(DuplicateReviewException ex) {
+    public ResponseEntity<ErrorResponse> duplicateReviewException(DuplicateReviewException ex) {
+        ErrorResponse error = new ErrorResponse("review", ex.getMessage());
+        return ResponseEntity.badRequest().body(error);
+    }
+
+    // 이벤트가 조회되지 않을때 에러처리
+    @ExceptionHandler(NoReviewException.class)
+    public ResponseEntity<ErrorResponse> noReviewException(NoReviewException ex) {
         ErrorResponse error = new ErrorResponse("review", ex.getMessage());
         return ResponseEntity.badRequest().body(error);
     }

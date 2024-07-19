@@ -20,8 +20,8 @@ public record AddReviewRequest (
 ){
         public Review toEntity(User user, EventInfo eventInfo){
                 return Review.builder()
-                        .userId(user)
-                        .eventInfoId(eventInfo)
+                        .user(user)
+                        .eventInfo(eventInfo)
                         .content(content)
                         .rating(rating)
                         .reviewPictureUrl(reviewPictureUrl)
