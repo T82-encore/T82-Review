@@ -3,9 +3,7 @@ package com.T82.review.domain.dto.request;
 import com.T82.review.domain.entity.EventInfo;
 import com.T82.review.domain.entity.Review;
 import com.T82.review.domain.entity.User;
-import jakarta.validation.constraints.NotBlank;
-import jakarta.validation.constraints.NotNull;
-import jakarta.validation.constraints.Size;
+import jakarta.validation.constraints.*;
 
 import java.time.LocalDate;
 import java.util.UUID;
@@ -15,6 +13,8 @@ public record AddReviewRequest (
         Long eventInfoId,
         String content,
         @NotNull(message = "공백일 수 없습니다.")
+        @Min(value = 1, message = "최소 평점은 1입니다.")
+        @Max(value = 5, message = "최대 평점은 5입니다.")
         Double rating,
         String reviewPictureUrl
 ){
