@@ -1,4 +1,4 @@
-package com.T82.review.kafka.dto;
+package com.T82.review.kafka.dto.request;
 
 import com.T82.review.domain.entity.User;
 

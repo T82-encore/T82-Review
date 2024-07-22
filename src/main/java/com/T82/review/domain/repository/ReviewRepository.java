@@ -12,4 +12,5 @@ import java.util.List;
 public interface ReviewRepository extends JpaRepository<Review, Long> {
     Review findByUserAndEventInfo(User user, EventInfo eventInfo);
     List<Review> findAllByUser(User user);
+    List<Review> findAllByUserAndIsDeleted(User user, Boolean isDeleted);
 }

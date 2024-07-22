@@ -18,7 +18,7 @@ import java.util.UUID;
 @Table(name = "Reviews_Users")
 public class User {
     @Id
-    @GeneratedValue(strategy = GenerationType.UUID)
+//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "USER_ID", nullable = false)
     private UUID userId;
 
@@ -31,4 +31,8 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @JsonManagedReference
     private List<Review> review;
+
+    public void deleteUser() {
+        this.isDeleted = true;
+    }
 }
