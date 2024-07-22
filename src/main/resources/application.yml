@@ -7,10 +7,17 @@ spring:
     password: 1234
   jpa:
     hibernate:
-      ddl-auto: none
+      ddl-auto: create
     show-sql: true
+  kafka:
+    bootstrap-servers: 34.66.127.160:9094
+    producer:
+      value-serializer: org.springframework.kafka.support.serializer.JsonSerializer
+    consumer:
+      value-deserializer: org.apache.kafka.common.serialization.ByteArrayDeserializer
+      group-id: user
+      auto-offset-reset: earliest
 server:
   port: 8001
-
 jwt:
   secret: VlwEyVBsYt9V7zq57TejMnVUyzblYcfPQye08f7MGVA9XkHa

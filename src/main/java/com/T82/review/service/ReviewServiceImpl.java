@@ -6,11 +6,16 @@ import com.T82.review.domain.entity.EventInfo;
 import com.T82.review.domain.entity.Review;
 import com.T82.review.domain.entity.User;
 import com.T82.review.domain.repository.ReviewRepository;
+import com.T82.review.domain.repository.UserRepository;
 import com.T82.review.exception.DuplicateReviewException;
 import com.T82.review.exception.NoReviewException;
 import com.T82.review.global.utils.TokenInfo;
+import com.T82.review.kafka.dto.KafkaStatus;
+import com.T82.review.kafka.dto.KafkaUserSignUpRequest;
 import lombok.RequiredArgsConstructor;
+import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.UUID;
@@ -18,6 +23,7 @@ import java.util.UUID;
 @Service
 @RequiredArgsConstructor
 public class ReviewServiceImpl implements ReviewService{
+    private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
 
 
@@ -62,5 +68,12 @@ public class ReviewServiceImpl implements ReviewService{
         }
         review.deleteReview();
         reviewRepository.save(review);
+    }
+
+
+    @Transactional
+    @KafkaListener(topics = "signup-topic")
+    public void synchronizationSignUp(KafkaStatus<KafkaUserSignUpRequest> status){
+        userRepository.save(status.data().toEntity(status.data()));
     }
 }
