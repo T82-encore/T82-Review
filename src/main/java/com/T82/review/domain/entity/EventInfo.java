@@ -17,7 +17,7 @@ import java.util.List;
 @Table(name = "Reviews_Event_Infos")
 public class EventInfo {
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+//    @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "EVENT_INFO_ID", nullable = false)
     private Long eventInfoId;
 

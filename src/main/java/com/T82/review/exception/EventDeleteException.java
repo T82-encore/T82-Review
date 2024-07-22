@@ -1,7 +1,7 @@
 package com.T82.review.exception;
 
-public class UserDeleteException extends RuntimeException {
-    public UserDeleteException(String message) {
+public class EventDeleteException extends RuntimeException {
+    public EventDeleteException(String message) {
         super(message);
     }
 }

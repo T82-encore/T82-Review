@@ -1,4 +1,4 @@
-package com.T82.user.kafka.dto.request;
+package com.T82.review.kafka.dto.request;
 
 import java.util.UUID;
 
