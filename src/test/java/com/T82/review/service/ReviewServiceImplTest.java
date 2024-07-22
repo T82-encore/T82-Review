@@ -20,6 +20,7 @@ import org.springframework.boot.test.context.SpringBootTest;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -44,16 +45,23 @@ class ReviewServiceImplTest {
         userRepository.deleteAll();
         eventInfoRepository.deleteAll();
 
+        UUID userId = UUID.randomUUID(); // UUID 생성
+        Long eventInfoId1 = 1L; // Long ID 설정
+        Long eventInfoId2 = 2L;
+
         user = userRepository.save(User.builder()
+                .userId(userId)
                 .email("user@example.com")
                 .isDeleted(false)
                 .build());
 
         eventInfo1 = eventInfoRepository.save(EventInfo.builder()
+                .eventInfoId(eventInfoId1)
                 .isDeleted(false)
                 .build());
 
         eventInfo2 = eventInfoRepository.save(EventInfo.builder()
+                .eventInfoId(eventInfoId2)
                 .isDeleted(false)
                 .build());
     }
