@@ -14,8 +14,7 @@ import com.T82.review.exception.NoReviewException;
 import com.T82.review.exception.UserDeleteException;
 import com.T82.review.global.utils.TokenInfo;
 import com.T82.review.kafka.dto.KafkaStatus;
-import com.T82.review.kafka.dto.request.KafkaUserDeleteRequest;
-import com.T82.review.kafka.dto.request.KafkaUserSignUpRequest;
+import com.T82.review.kafka.dto.request.*;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -102,7 +101,7 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     @KafkaListener(topics = "signup-topic")
-    public void synchronizationSignUp(KafkaStatus<KafkaUserSignUpRequest> status){
+    public void synchronizationSignUpUser(KafkaStatus<KafkaUserSignUpRequest> status){
         System.out.println(status.data());
         KafkaUserSignUpRequest data = status.data();
         System.out.println(data.userId());
@@ -113,9 +112,30 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     @KafkaListener(topics = "delete-topic")
-    public void synchronizationDelete(KafkaStatus<KafkaUserDeleteRequest> status){
+    public void synchronizationDeleteUser(KafkaStatus<KafkaUserDeleteRequest> status){
         User user = userRepository.findByUserId(status.data().userId());
         user.deleteUser();
         userRepository.save(user);
     }
+
+    //추후 희석이형 보내신 토픽 맞춰 변경 필요
+    @Transactional
+    @KafkaListener(topics = "create-event-topic")
+    public void synchronizationCreateEvent(KafkaStatus<KafkaEventCreateRequest> status){
+        eventInfoRepository.save(status.data().toEntity(status.data()));
+    }
+
+
+    //추후 희석이형 보내신 토픽 맞춰 변경 필요
+    @Transactional
+    @KafkaListener(topics = "delete-event-topic")
+    public void synchronizationDeleteEvent(KafkaStatus<KafkaEventDeleteRequest> status){
+        EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data().eventInfoId());
+        eventInfo.deleteEvent();
+        eventInfoRepository.save(eventInfo);
+    }
+
+
+
+
 }

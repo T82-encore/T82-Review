@@ -27,4 +27,8 @@ public class EventInfo {
     @OneToMany(mappedBy = "eventInfo", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @JsonManagedReference
     private List<Review> review;
+
+    public void deleteEvent() {
+        this.isDeleted = true;
+    }
 }
