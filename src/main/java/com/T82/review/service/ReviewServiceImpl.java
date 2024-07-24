@@ -137,18 +137,18 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     @KafkaListener(topics = "eventInfoTopic")
-    public void handleEventSynchronization(KafkaStatus<?> status) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public void handleEventSynchronization(KafkaStatus<Long> status) {
         switch (status.status()) {
             case "create":
-                KafkaEventCreateRequest createData = objectMapper.convertValue(status.data(), KafkaEventCreateRequest.class);
-                eventInfoRepository.save(createData.toEntity(createData));
+                eventInfoRepository.save(EventInfo.builder()
+                        .eventInfoId(status.data())
+                        .isDeleted(false)
+                        .build()
+                );
                 break;
             case "delete":
-                KafkaEventDeleteRequest deleteData = objectMapper.convertValue(status.data(), KafkaEventDeleteRequest.class);
-                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(deleteData.eventInfoId());
+                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data());
                 eventInfo.deleteEvent();
-                eventInfoRepository.save(eventInfo);
                 break;
             default:
                 System.out.println("Unknown status: " + status.status());
