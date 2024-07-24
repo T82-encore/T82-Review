@@ -36,7 +36,8 @@ class ReviewServiceImplTest {
     @Autowired
     ReviewService reviewService;
 
-    private User user;
+    private User user1;
+    private User user2;
     private EventInfo eventInfo1;
     private EventInfo eventInfo2;
     @BeforeEach
@@ -45,13 +46,20 @@ class ReviewServiceImplTest {
         userRepository.deleteAll();
         eventInfoRepository.deleteAll();
 
-        UUID userId = UUID.randomUUID(); // UUID 생성
+        UUID userId1 = UUID.randomUUID();
+        UUID userId2 = UUID.randomUUID(); // UUID 생성
         Long eventInfoId1 = 1L; // Long ID 설정
         Long eventInfoId2 = 2L;
 
-        user = userRepository.save(User.builder()
-                .userId(userId)
+        user1 = userRepository.save(User.builder()
+                .userId(userId1)
                 .email("user@example.com")
+                .isDeleted(false)
+                .build());
+
+        user2 = userRepository.save(User.builder()
+                .userId(userId2)
+                .email("user1@example.com")
                 .isDeleted(false)
                 .build());
 
@@ -71,7 +79,7 @@ class ReviewServiceImplTest {
         @Test
         void 성공() {
             // given
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
             AddReviewRequest request = new AddReviewRequest(
                     eventInfo1.getEventInfoId(), "좋아요", 4.5, "http://example.com/image.jpg");
 
@@ -81,13 +89,13 @@ class ReviewServiceImplTest {
             // then
             List<Review> reviews = reviewRepository.findAll();
             assertEquals(1, reviews.size());
-            assertNotNull(reviewRepository.findByUserAndEventInfo(user, eventInfo1));
+            assertNotNull(reviewRepository.findByUserAndEventInfo(user1, eventInfo1));
         }
 
         @Test
         void 실패_중복_리뷰_생성() {
             // given
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
             AddReviewRequest request = new AddReviewRequest(
                     eventInfo1.getEventInfoId(), "좋아요", 4.5, "http://example.com/image.jpg");
 
@@ -102,12 +110,12 @@ class ReviewServiceImplTest {
     }
 
     @Nested
-    class 전체_리뷰_조회 {
+    class 유저가_작성한_전체_리뷰_조회 {
         @Test
         void 성공() {
             // given
             reviewRepository.save(Review.builder()
-                    .user(user)
+                    .user(user1)
                     .eventInfo(eventInfo1)
                     .content("좋아요")
                     .rating(4.0)
@@ -117,7 +125,7 @@ class ReviewServiceImplTest {
                     .build());
 
             reviewRepository.save(Review.builder()
-                    .user(user)
+                    .user(user1)
                     .eventInfo(eventInfo2)
                     .content("별로에요")
                     .rating(2.0)
@@ -126,9 +134,9 @@ class ReviewServiceImplTest {
                     .createdDate(LocalDate.now())
                     .build());
 
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
             // when
-            List<ReviewResponse> reviews = reviewService.getAllReviews(tokenInfo);
+            List<ReviewResponse> reviews = reviewService.getAllUserReview(tokenInfo);
 
             // then
             assertNotNull(reviews.get(0).eventInfoId());
@@ -143,23 +151,23 @@ class ReviewServiceImplTest {
         @Test
         void 실패_리뷰_없음() {
             // given
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
 
             // when & then
             NoReviewException exception = assertThrows(NoReviewException.class, () -> {
-                reviewService.getAllReviews(tokenInfo);
+                reviewService.getAllUserReview(tokenInfo);
             });
 
             assertEquals("해당 유저가 작성한 리뷰가 존재하지 않습니다.", exception.getMessage());
         }
     }
     @Nested
-    class 한_이벤트에_대한_리뷰_조회 {
+    class 한_이벤트에_대한_전체_리뷰_조회 {
         @Test
         void 성공() {
             // given
             reviewRepository.save(Review.builder()
-                    .user(user)
+                    .user(user1)
                     .eventInfo(eventInfo1)
                     .content("좋아요")
                     .rating(4.0)
@@ -169,8 +177,8 @@ class ReviewServiceImplTest {
                     .build());
 
             reviewRepository.save(Review.builder()
-                    .user(user)
-                    .eventInfo(eventInfo2)
+                    .user(user2)
+                    .eventInfo(eventInfo1)
                     .content("별로에요")
                     .rating(2.0)
                     .reviewPictureUrl("http://example.com/image2.jpg")
@@ -178,26 +186,24 @@ class ReviewServiceImplTest {
                     .createdDate(LocalDate.now())
                     .build());
 
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
-
             // when
-            ReviewResponse reviews = reviewService.getReview(tokenInfo, eventInfo1.getEventInfoId());
+            List<ReviewResponse> allReview = reviewService.getAllReview(eventInfo1.getEventInfoId());
 
             // then
-            assertEquals(eventInfo1.getEventInfoId(), reviews.eventInfoId());
-            assertEquals("좋아요", reviews.content());
-            assertEquals(4.0, reviews.rating());
-            assertEquals("http://example.com/image.jpg", reviews.reviewPictureUrl());
+            assertEquals(allReview.size(), 2);
+            assertEquals("좋아요", allReview.get(0).content());
+            assertEquals(4.0, allReview.get(0).rating());
+            assertEquals("http://example.com/image.jpg", allReview.get(0).reviewPictureUrl());
         }
 
         @Test
         void 실패_리뷰_없음() {
             // given
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
 
             // when & then
             NoReviewException exception = assertThrows(NoReviewException.class, () -> {
-                reviewService.getReview(tokenInfo, eventInfo1.getEventInfoId());
+                reviewService.getAllReview(eventInfo1.getEventInfoId());
             });
 
             assertEquals("해당 이벤트에 대한 리뷰가 존재하지 않습니다.", exception.getMessage());
@@ -210,7 +216,7 @@ class ReviewServiceImplTest {
         void 성공() {
             // given
             Review review = reviewRepository.save(Review.builder()
-                    .user(user)
+                    .user(user1)
                     .eventInfo(eventInfo1)
                     .content("좋아요")
                     .rating(4.0)
@@ -218,7 +224,7 @@ class ReviewServiceImplTest {
                     .isDeleted(false)
                     .createdDate(LocalDate.now())
                     .build());
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
 
             // when
             reviewService.deleteReview(tokenInfo,eventInfo1.getEventInfoId());
@@ -230,7 +236,7 @@ class ReviewServiceImplTest {
         @Test
         void 실패_리뷰_없음() {
             // given
-            TokenInfo tokenInfo = new TokenInfo(user.getUserId(), user.getEmail());
+            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
 
             // when & then
             NoReviewException exception = assertThrows(NoReviewException.class, () -> {

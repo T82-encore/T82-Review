@@ -49,7 +49,7 @@ public class ReviewServiceImpl implements ReviewService{
 
 //    모든 리뷰 가져오기
     @Override
-    public List<ReviewResponse> getAllReviews(TokenInfo tokenInfo) {
+    public List<ReviewResponse> getAllUserReview(TokenInfo tokenInfo) {
         User user = getUser(tokenInfo);
         List<Review> allByUser = reviewRepository.findAllByUserAndIsDeleted(user, false);
         if (allByUser.isEmpty()) {
@@ -60,19 +60,21 @@ public class ReviewServiceImpl implements ReviewService{
 
 //    한 이벤트에 대한 리뷰 가져오기
     @Override
-    public ReviewResponse getReview(TokenInfo tokenInfo, Long eventInfoId) {
-        User user = getUser(tokenInfo);
+    public List<ReviewResponse> getAllReview(Long eventInfoId) {
         EventInfo eventInfo = getValidEventInfo(eventInfoId);
-        Review review = getValidReview(user, eventInfo);
-        return ReviewResponse.from(review);
+        List<Review> allByEventInfo = reviewRepository.findAllByEventInfoAndIsDeleted(eventInfo, false);
+        if (allByEventInfo.isEmpty()) {
+            throw new NoReviewException("해당 이벤트에 대한 리뷰가 존재하지 않습니다.");
+        }
+        return allByEventInfo.stream().map(ReviewResponse::from).toList();
     }
 
 //    리뷰 삭제하기
     @Override
-    public void deleteReview(TokenInfo tokenInfo, Long eventInfoId) {
+    public void deleteReview(TokenInfo tokenInfo, Long reviewId) {
         User user = getUser(tokenInfo);
-        EventInfo eventInfo = getValidEventInfo(eventInfoId);
-        Review review = getValidReview(user, eventInfo);
+        EventInfo eventInfo = getValidEventInfo(reviewId);
+        Review review = getValidReview(user, reviewId);
         review.deleteReview();
         reviewRepository.save(review);
         KafkaReviewRequest kafkaReviewRequest = new KafkaReviewRequest(
@@ -107,8 +109,8 @@ public class ReviewServiceImpl implements ReviewService{
         }
     }
 
-    private Review getValidReview(User user, EventInfo eventInfo) {
-        Review review = reviewRepository.findByUserAndEventInfo(user, eventInfo);
+    private Review getValidReview(User user, Long reviewId) {
+        Review review = reviewRepository.findByUserAndReviewId(user, reviewId);
         if (review == null) {
             throw new NoReviewException("해당 이벤트에 대한 리뷰가 존재하지 않습니다.");
         }
@@ -117,16 +119,13 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     @KafkaListener(topics = "userTopic")
-    public void handleUserSynchronization(KafkaStatus<?> status) {
-        ObjectMapper objectMapper = new ObjectMapper();
+    public void handleUserSynchronization(KafkaStatus<KafkaUserRequest> status) {
         switch (status.status()) {
             case "signUp":
-                KafkaUserSignUpRequest signUpData = objectMapper.convertValue(status.data(), KafkaUserSignUpRequest.class);
-                userRepository.save(signUpData.toEntity(signUpData));
+                userRepository.save(status.data().toEntity(status.data()));
                 break;
             case "delete":
-                KafkaUserDeleteRequest deleteData = objectMapper.convertValue(status.data(), KafkaUserDeleteRequest.class);
-                User user = userRepository.findByUserId(deleteData.userId());
+                User user = userRepository.findByUserId(status.data().userId());
                 user.deleteUser();
                 userRepository.save(user);
                 break;
