@@ -25,21 +25,22 @@ public class ReviewController {
         return ResponseEntity.ok("리뷰 등록 성공");
     }
 
+    //유저가 쓴 전체 리뷰
     @GetMapping
-    public List<ReviewResponse> getAllReview(@AuthenticationPrincipal TokenInfo tokenInfo) {
-        return reviewService.getAllReviews(tokenInfo);
+    public List<ReviewResponse> getAllUserReview(@AuthenticationPrincipal TokenInfo tokenInfo) {
+        return reviewService.getAllUserReview(tokenInfo);
     }
 
+    //이벤트에 쓰여있는 전체 리뷰
     @GetMapping("/{eventInfoId}")
-    public ReviewResponse getReview(@AuthenticationPrincipal TokenInfo tokenInfo,
-                                    @PathVariable(name = "eventInfoId") Long eventInfoId) {
-        return reviewService.getReview(tokenInfo,eventInfoId);
+    public List<ReviewResponse> getAllReview(@PathVariable(name = "eventInfoId") Long eventInfoId) {
+        return reviewService.getAllReview(eventInfoId);
     }
 
-    @DeleteMapping("/{eventInfoId}")
+    @DeleteMapping("/{reviewId}")
     public ResponseEntity<String> deleteReview(@AuthenticationPrincipal TokenInfo tokenInfo,
-                                               @PathVariable(name = "eventInfoId") Long eventInfoId) {
-        reviewService.deleteReview(tokenInfo,eventInfoId);
+                                               @PathVariable(name = "reviewId") Long reviewId) {
+        reviewService.deleteReview(tokenInfo,reviewId);
         return ResponseEntity.ok("리뷰 삭제 성공");
     }
 
