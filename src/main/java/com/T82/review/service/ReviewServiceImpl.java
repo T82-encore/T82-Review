@@ -136,17 +136,13 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     @KafkaListener(topics = "eventInfoTopic")
-    public void handleEventSynchronization(KafkaStatus<Long> status) {
+    public void handleEventSynchronization(KafkaStatus<KafkaEventInfoRequest> status) {
         switch (status.status()) {
             case "create":
-                eventInfoRepository.save(EventInfo.builder()
-                        .eventInfoId(status.data())
-                        .isDeleted(false)
-                        .build()
-                );
+                eventInfoRepository.save(status.data().toEntity(status.data()));
                 break;
             case "delete":
-                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data());
+                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data().eventInfoId());
                 eventInfo.deleteEvent();
                 break;
             default:
