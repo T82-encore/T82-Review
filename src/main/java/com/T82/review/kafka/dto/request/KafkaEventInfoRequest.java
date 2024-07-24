@@ -3,12 +3,15 @@ package com.T82.review.kafka.dto.request;
 import com.T82.review.domain.entity.EventInfo;
 import com.T82.review.domain.entity.User;
 
-public record KafkaEventCreateRequest(
+import java.util.UUID;
+
+public record KafkaEventInfoRequest(
         Long eventInfoId
+
 ) {
-    public EventInfo toEntity(KafkaEventCreateRequest kafkaEventCreateRequest) {
+    public EventInfo toEntity(KafkaEventInfoRequest kafkaEventInfoRequest) {
         return EventInfo.builder()
-                .eventInfoId(kafkaEventCreateRequest.eventInfoId())
+                .eventInfoId(kafkaEventInfoRequest.eventInfoId)
                 .isDeleted(false)
                 .build();
     }
