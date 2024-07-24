@@ -15,6 +15,8 @@ import com.T82.review.exception.UserDeleteException;
 import com.T82.review.global.utils.TokenInfo;
 import com.T82.review.kafka.dto.KafkaStatus;
 import com.T82.review.kafka.dto.request.*;
+import com.T82.review.kafka.producer.KafkaProducer;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -28,16 +30,24 @@ public class ReviewServiceImpl implements ReviewService{
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final EventInfoRepository eventInfoRepository;
+    private final KafkaProducer kafkaProducer;
 
 
+//    리뷰 생성
     @Override
     public void addReview(TokenInfo tokenInfo, AddReviewRequest addReviewRequest) {
         User user = getUser(tokenInfo);
         EventInfo eventInfo = getValidEventInfo(addReviewRequest.eventInfoId());
         checkDuplicateReview(user, eventInfo);
         reviewRepository.save(addReviewRequest.toEntity(user, eventInfo));
+        KafkaReviewRequest kafkaReviewRequest = new KafkaReviewRequest(
+                addReviewRequest.eventInfoId(),addReviewRequest.rating()
+        );
+        kafkaProducer.createReview(kafkaReviewRequest, "reviewTopic");
+
     }
 
+//    모든 리뷰 가져오기
     @Override
     public List<ReviewResponse> getAllReviews(TokenInfo tokenInfo) {
         User user = getUser(tokenInfo);
@@ -48,6 +58,7 @@ public class ReviewServiceImpl implements ReviewService{
         return allByUser.stream().map(ReviewResponse::from).toList();
     }
 
+//    한 이벤트에 대한 리뷰 가져오기
     @Override
     public ReviewResponse getReview(TokenInfo tokenInfo, Long eventInfoId) {
         User user = getUser(tokenInfo);
@@ -56,6 +67,7 @@ public class ReviewServiceImpl implements ReviewService{
         return ReviewResponse.from(review);
     }
 
+//    리뷰 삭제하기
     @Override
     public void deleteReview(TokenInfo tokenInfo, Long eventInfoId) {
         User user = getUser(tokenInfo);
@@ -63,6 +75,11 @@ public class ReviewServiceImpl implements ReviewService{
         Review review = getValidReview(user, eventInfo);
         review.deleteReview();
         reviewRepository.save(review);
+        KafkaReviewRequest kafkaReviewRequest = new KafkaReviewRequest(
+                review.getReviewId(),review.getRating()
+        );
+        kafkaProducer.deleteReview(kafkaReviewRequest, "reviewTopic");
+
     }
 
 
@@ -98,41 +115,44 @@ public class ReviewServiceImpl implements ReviewService{
         return review;
     }
 
-
     @Transactional
-    @KafkaListener(topics = "signup-topic")
-    public void synchronizationSignUpUser(KafkaStatus<KafkaUserSignUpRequest> status){
-        System.out.println(status.data());
-        KafkaUserSignUpRequest data = status.data();
-        System.out.println(data.userId());
-        System.out.println(data.toEntity(data).getUserId());
-        User save = userRepository.save(data.toEntity(data));
-        System.out.println("최종: "+save.getUserId());
+    @KafkaListener(topics = "userTopic")
+    public void handleUserSynchronization(KafkaStatus<?> status) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        switch (status.status()) {
+            case "signUp":
+                KafkaUserSignUpRequest signUpData = objectMapper.convertValue(status.data(), KafkaUserSignUpRequest.class);
+                userRepository.save(signUpData.toEntity(signUpData));
+                break;
+            case "delete":
+                KafkaUserDeleteRequest deleteData = objectMapper.convertValue(status.data(), KafkaUserDeleteRequest.class);
+                User user = userRepository.findByUserId(deleteData.userId());
+                user.deleteUser();
+                userRepository.save(user);
+                break;
+            default:
+                System.out.println("Unknown status: " + status.status());
+        }
     }
 
     @Transactional
-    @KafkaListener(topics = "delete-topic")
-    public void synchronizationDeleteUser(KafkaStatus<KafkaUserDeleteRequest> status){
-        User user = userRepository.findByUserId(status.data().userId());
-        user.deleteUser();
-        userRepository.save(user);
-    }
-
-    //추후 희석이형 보내신 토픽 맞춰 변경 필요
-    @Transactional
-    @KafkaListener(topics = "create-event-topic")
-    public void synchronizationCreateEvent(KafkaStatus<KafkaEventCreateRequest> status){
-        eventInfoRepository.save(status.data().toEntity(status.data()));
-    }
-
-
-    //추후 희석이형 보내신 토픽 맞춰 변경 필요
-    @Transactional
-    @KafkaListener(topics = "delete-event-topic")
-    public void synchronizationDeleteEvent(KafkaStatus<KafkaEventDeleteRequest> status){
-        EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data().eventInfoId());
-        eventInfo.deleteEvent();
-        eventInfoRepository.save(eventInfo);
+    @KafkaListener(topics = "eventInfoTopic")
+    public void handleEventSynchronization(KafkaStatus<?> status) {
+        ObjectMapper objectMapper = new ObjectMapper();
+        switch (status.status()) {
+            case "create":
+                KafkaEventCreateRequest createData = objectMapper.convertValue(status.data(), KafkaEventCreateRequest.class);
+                eventInfoRepository.save(createData.toEntity(createData));
+                break;
+            case "delete":
+                KafkaEventDeleteRequest deleteData = objectMapper.convertValue(status.data(), KafkaEventDeleteRequest.class);
+                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(deleteData.eventInfoId());
+                eventInfo.deleteEvent();
+                eventInfoRepository.save(eventInfo);
+                break;
+            default:
+                System.out.println("Unknown status: " + status.status());
+        }
     }
 
 
