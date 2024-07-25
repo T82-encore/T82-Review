@@ -73,12 +73,11 @@ public class ReviewServiceImpl implements ReviewService{
     @Override
     public void deleteReview(TokenInfo tokenInfo, Long reviewId) {
         User user = getUser(tokenInfo);
-        EventInfo eventInfo = getValidEventInfo(reviewId);
         Review review = getValidReview(user, reviewId);
         review.deleteReview();
         reviewRepository.save(review);
         KafkaReviewRequest kafkaReviewRequest = new KafkaReviewRequest(
-                review.getReviewId(),review.getRating()
+                review.getEventInfo().getEventInfoId(), review.getRating()
         );
         kafkaProducer.deleteReview(kafkaReviewRequest, "reviewTopic");
 
