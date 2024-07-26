@@ -49,16 +49,13 @@ public class SecurityConfig {
             corsConfiguration.setAllowedOrigins(List.of("*"));
             return corsConfiguration;
         }));
-//        http.authorizeHttpRequests(auth ->
-//                auth.requestMatchers("/api/v1/user/signup","/api/v1/user/login")
-//                        .permitAll()
-//                        .anyRequest()
-//                        .authenticated()
-//        );
-        http.userDetailsService(authService);
-        http.authorizeHttpRequests(req->
-                req.anyRequest().authenticated()
+        http.authorizeHttpRequests(req ->
+                req.requestMatchers("/api/v1/reviews","/actuator/**")
+                        .permitAll()
+                        .anyRequest()
+                        .authenticated()
         );
+        http.userDetailsService(authService);
         http.addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         // 세션을 사용하지 않기 때문에 STATELESS로 설정
