@@ -9,9 +9,15 @@ public record KafkaEventInfoRequest(
         Long eventInfoId
 
 ) {
-    public EventInfo toEntity(KafkaEventInfoRequest kafkaEventInfoRequest) {
+//    public EventInfo toEntity(KafkaEventInfoRequest kafkaEventInfoRequest) {
+//        return EventInfo.builder()
+//                .eventInfoId(kafkaEventInfoRequest.eventInfoId)
+//                .isDeleted(false)
+//                .build();
+//    }
+    public EventInfo toEntity() {
         return EventInfo.builder()
-                .eventInfoId(kafkaEventInfoRequest.eventInfoId)
+                .eventInfoId(this.eventInfoId)
                 .isDeleted(false)
                 .build();
     }

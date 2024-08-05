@@ -154,11 +154,12 @@ class ReviewServiceImplTest {
             TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
 
             // when & then
-            NoReviewException exception = assertThrows(NoReviewException.class, () -> {
-                reviewService.getAllUserReview(tokenInfo);
-            });
+//            NoReviewException exception = assertThrows(NoReviewException.class, () -> {
+//                reviewService.getAllUserReview(tokenInfo);
+//            });
+            List<ReviewResponse> allUserReview = reviewService.getAllUserReview(tokenInfo);
 
-            assertEquals("해당 유저가 작성한 리뷰가 존재하지 않습니다.", exception.getMessage());
+            assertEquals(0, allUserReview.size());
         }
     }
     @Nested
@@ -202,11 +203,12 @@ class ReviewServiceImplTest {
             TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
 
             // when & then
-            NoReviewException exception = assertThrows(NoReviewException.class, () -> {
-                reviewService.getAllReview(eventInfo1.getEventInfoId());
-            });
+//            NoReviewException exception = assertThrows(NoReviewException.class, () -> {
+//                reviewService.getAllReview(eventInfo1.getEventInfoId());
+//            });
+            List<ReviewResponse> allReview = reviewService.getAllReview(eventInfo1.getEventInfoId());
 
-            assertEquals("해당 이벤트에 대한 리뷰가 존재하지 않습니다.", exception.getMessage());
+            assertEquals(0, allReview.size());
         }
     }
 
