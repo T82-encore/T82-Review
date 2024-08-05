@@ -50,7 +50,7 @@ public class SecurityConfig {
             return corsConfiguration;
         }));
         http.authorizeHttpRequests(req ->
-                req.requestMatchers("/api/v1/reviews","/actuator/**")
+                req.requestMatchers("/api/v1/**","/actuator/**")
                         .permitAll()
                         .anyRequest()
                         .authenticated()

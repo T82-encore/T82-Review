@@ -52,9 +52,6 @@ public class ReviewServiceImpl implements ReviewService{
     public List<ReviewResponse> getAllUserReview(TokenInfo tokenInfo) {
         User user = getUser(tokenInfo);
         List<Review> allByUser = reviewRepository.findAllByUserAndIsDeleted(user, false);
-        if (allByUser.isEmpty()) {
-            throw new NoReviewException("해당 유저가 작성한 리뷰가 존재하지 않습니다.");
-        }
         return allByUser.stream().map(ReviewResponse::from).toList();
     }
 
@@ -63,9 +60,6 @@ public class ReviewServiceImpl implements ReviewService{
     public List<ReviewResponse> getAllReview(Long eventInfoId) {
         EventInfo eventInfo = getValidEventInfo(eventInfoId);
         List<Review> allByEventInfo = reviewRepository.findAllByEventInfoAndIsDeleted(eventInfo, false);
-        if (allByEventInfo.isEmpty()) {
-            throw new NoReviewException("해당 이벤트에 대한 리뷰가 존재하지 않습니다.");
-        }
         return allByEventInfo.stream().map(ReviewResponse::from).toList();
     }
 
@@ -135,13 +129,14 @@ public class ReviewServiceImpl implements ReviewService{
 
     @Transactional
     @KafkaListener(topics = "eventInfoTopic")
-    public void handleEventSynchronization(KafkaStatus<KafkaEventInfoRequest> status) {
+    public void handleEventSynchronization(KafkaStatus<Long> status) {
         switch (status.status()) {
             case "create":
-                eventInfoRepository.save(status.data().toEntity(status.data()));
+                KafkaEventInfoRequest kafkaEventInfoRequest = new KafkaEventInfoRequest(status.data());
+                eventInfoRepository.save(kafkaEventInfoRequest.toEntity());
                 break;
             case "delete":
-                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data().eventInfoId());
+                EventInfo eventInfo = eventInfoRepository.findByEventInfoId(status.data());
                 eventInfo.deleteEvent();
                 break;
             default:
