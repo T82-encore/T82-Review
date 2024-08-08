@@ -46,6 +46,8 @@ public class Review {
     @Column(name = "CREATED_DATE", nullable = false)
     private LocalDate createdDate;
 
+    @Column(name = "TICKET_ID", nullable = false)
+    private Long ticketId;
     public void deleteReview() {
         this.isDeleted = true;
     }

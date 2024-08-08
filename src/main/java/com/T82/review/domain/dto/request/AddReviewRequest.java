@@ -16,6 +16,8 @@ public record AddReviewRequest (
         @Min(value = 1, message = "최소 평점은 1입니다.")
         @Max(value = 5, message = "최대 평점은 5입니다.")
         Double rating,
+        @NotNull(message = "공백일 수 없습니다.")
+        Long ticketId,
         String reviewPictureUrl
 ){
         public Review toEntity(User user, EventInfo eventInfo){
@@ -24,6 +26,7 @@ public record AddReviewRequest (
                         .eventInfo(eventInfo)
                         .content(content)
                         .rating(rating)
+                        .ticketId(ticketId)
                         .reviewPictureUrl(reviewPictureUrl)
                         .isDeleted(false)
                         .createdDate(LocalDate.now())

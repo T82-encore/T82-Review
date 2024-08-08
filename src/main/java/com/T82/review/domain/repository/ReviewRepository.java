@@ -12,4 +12,5 @@ public interface ReviewRepository extends JpaRepository<Review, Long> {
     Review findByUserAndReviewId(User user, Long reviewId);
     List<Review> findAllByEventInfoAndIsDeleted(EventInfo eventInfo, Boolean isDeleted);
     List<Review> findAllByUserAndIsDeleted(User user, Boolean isDeleted);
+    Review findByTicketId(Long ticketId);
 }
