@@ -38,7 +38,7 @@ public class ReviewServiceImpl implements ReviewService{
     public void addReview(TokenInfo tokenInfo, AddReviewRequest addReviewRequest) {
         User user = getUser(tokenInfo);
         EventInfo eventInfo = getValidEventInfo(addReviewRequest.eventInfoId());
-        checkDuplicateReview(user, eventInfo);
+        checkDuplicateReview(addReviewRequest.ticketId());
         reviewRepository.save(addReviewRequest.toEntity(user, eventInfo));
         KafkaReviewRequest kafkaReviewRequest = new KafkaReviewRequest(
                 addReviewRequest.eventInfoId(),addReviewRequest.rating()
@@ -96,8 +96,11 @@ public class ReviewServiceImpl implements ReviewService{
         return eventInfo;
     }
 
-    private void checkDuplicateReview(User user, EventInfo eventInfo) {
-        if (reviewRepository.findByUserAndEventInfo(user, eventInfo) != null) {
+    private void checkDuplicateReview(Long ticketId) {
+//        if (reviewRepository.findByUserAndEventInfo(user, eventInfo) != null) {
+//            throw new DuplicateReviewException("해당 이벤트에 대한 리뷰가 이미 존재합니다.");
+//        }
+        if(reviewRepository.findByTicketId(ticketId) != null){
             throw new DuplicateReviewException("해당 이벤트에 대한 리뷰가 이미 존재합니다.");
         }
     }
