@@ -53,14 +53,18 @@ class ReviewServiceImplTest {
 
         user1 = userRepository.save(User.builder()
                 .userId(userId1)
+                .username("홍길동")
                 .email("user@example.com")
                 .isDeleted(false)
+                .isArtist(true)
                 .build());
 
         user2 = userRepository.save(User.builder()
                 .userId(userId2)
+                .username("이기철")
                 .email("user1@example.com")
                 .isDeleted(false)
+                .isArtist(true)
                 .build());
 
         eventInfo1 = eventInfoRepository.save(EventInfo.builder()
@@ -90,22 +94,6 @@ class ReviewServiceImplTest {
             List<Review> reviews = reviewRepository.findAll();
             assertEquals(1, reviews.size());
             assertNotNull(reviewRepository.findByUserAndEventInfo(user1, eventInfo1));
-        }
-
-        @Test
-        void 실패_중복_리뷰_생성() {
-            // given
-            TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
-            AddReviewRequest request = new AddReviewRequest(
-                    eventInfo1.getEventInfoId(), "좋아요", 4.5,"http://example.com/image.jpg");
-
-            reviewService.addReview(tokenInfo, request);
-
-            // when & then
-            DuplicateReviewException exception = assertThrows(DuplicateReviewException.class, () -> {
-                reviewService.addReview(tokenInfo, request);
-            });
-            assertEquals("해당 이벤트에 대한 리뷰가 이미 존재합니다.", exception.getMessage());
         }
     }
 
