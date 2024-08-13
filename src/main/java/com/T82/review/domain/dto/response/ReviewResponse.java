@@ -9,17 +9,20 @@ import java.util.UUID;
 @Builder
 public record ReviewResponse(
         Long eventInfoId,
+        Long reviewId,
         String content,
         Double rating,
         String reviewPictureUrl,
         LocalDate createdDate,
         UUID userId,
         String userName,
+        String userImage,
         boolean isArtist
 ) {
     public static ReviewResponse from(Review review) {
         return ReviewResponse.builder()
                 .eventInfoId(review.getEventInfo().getEventInfoId())
+                .reviewId(review.getReviewId())
                 .content(review.getContent())
                 .rating(review.getRating())
                 .reviewPictureUrl(review.getReviewPictureUrl())
@@ -28,6 +31,7 @@ public record ReviewResponse(
                 .isArtist(review.getUser().getIsArtist())
                 .userName(review.getUser().getUsername())
                 .isArtist(review.getUser().getIsArtist())
+                .userImage(review.getUser().getImageUrl())
                 .build();
     }
 }
