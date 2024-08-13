@@ -95,6 +95,7 @@ class ReviewServiceImplTest {
             assertEquals(1, reviews.size());
             assertNotNull(reviewRepository.findByUserAndEventInfo(user1, eventInfo1));
         }
+
     }
 
     @Nested
