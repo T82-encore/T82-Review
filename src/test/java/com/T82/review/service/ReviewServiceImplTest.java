@@ -81,7 +81,7 @@ class ReviewServiceImplTest {
             // given
             TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
             AddReviewRequest request = new AddReviewRequest(
-                    eventInfo1.getEventInfoId(), "좋아요", 4.5,1L, "http://example.com/image.jpg");
+                    eventInfo1.getEventInfoId(), "좋아요", 4.5, "http://example.com/image.jpg");
 
             // when
             reviewService.addReview(tokenInfo, request);
@@ -97,7 +97,7 @@ class ReviewServiceImplTest {
             // given
             TokenInfo tokenInfo = new TokenInfo(user1.getUserId(), user1.getEmail());
             AddReviewRequest request = new AddReviewRequest(
-                    eventInfo1.getEventInfoId(), "좋아요", 4.5,1L, "http://example.com/image.jpg");
+                    eventInfo1.getEventInfoId(), "좋아요", 4.5,"http://example.com/image.jpg");
 
             reviewService.addReview(tokenInfo, request);
 
@@ -117,7 +117,6 @@ class ReviewServiceImplTest {
             reviewRepository.save(Review.builder()
                     .user(user1)
                     .eventInfo(eventInfo1)
-                    .ticketId(1L)
                     .content("좋아요")
                     .rating(4.0)
                     .reviewPictureUrl("http://example.com/image.jpg")
@@ -128,7 +127,6 @@ class ReviewServiceImplTest {
             reviewRepository.save(Review.builder()
                     .user(user1)
                     .eventInfo(eventInfo2)
-                    .ticketId(2L)
                     .content("별로에요")
                     .rating(2.0)
                     .reviewPictureUrl("http://example.com/image2.jpg")
@@ -169,7 +167,6 @@ class ReviewServiceImplTest {
             reviewRepository.save(Review.builder()
                     .user(user1)
                     .eventInfo(eventInfo1)
-                    .ticketId(1L)
                     .content("좋아요")
                     .rating(4.0)
                     .reviewPictureUrl("http://example.com/image.jpg")
@@ -180,7 +177,6 @@ class ReviewServiceImplTest {
             reviewRepository.save(Review.builder()
                     .user(user2)
                     .eventInfo(eventInfo1)
-                    .ticketId(2L)
                     .content("별로에요")
                     .rating(2.0)
                     .reviewPictureUrl("http://example.com/image2.jpg")
@@ -218,7 +214,6 @@ class ReviewServiceImplTest {
             Review review = reviewRepository.save(Review.builder()
                     .user(user1)
                     .eventInfo(eventInfo1)
-                    .ticketId(1L)
                     .content("좋아요")
                     .rating(4.0)
                     .reviewPictureUrl("http://example.com/image.jpg")

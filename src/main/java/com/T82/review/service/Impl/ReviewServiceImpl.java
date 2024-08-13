@@ -1,4 +1,4 @@
-package com.T82.review.service;
+package com.T82.review.service.Impl;
 
 import com.T82.review.domain.dto.request.AddReviewRequest;
 import com.T82.review.domain.dto.response.ReviewResponse;
@@ -16,6 +16,7 @@ import com.T82.review.global.utils.TokenInfo;
 import com.T82.review.kafka.dto.KafkaStatus;
 import com.T82.review.kafka.dto.request.*;
 import com.T82.review.kafka.producer.KafkaProducer;
+import com.T82.review.service.ReviewService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
@@ -26,7 +27,7 @@ import java.util.List;
 
 @Service
 @RequiredArgsConstructor
-public class ReviewServiceImpl implements ReviewService{
+public class ReviewServiceImpl implements ReviewService {
     private final UserRepository userRepository;
     private final ReviewRepository reviewRepository;
     private final EventInfoRepository eventInfoRepository;
@@ -38,7 +39,6 @@ public class ReviewServiceImpl implements ReviewService{
     public void addReview(TokenInfo tokenInfo, AddReviewRequest addReviewRequest) {
         User user = getUser(tokenInfo);
         EventInfo eventInfo = getValidEventInfo(addReviewRequest.eventInfoId());
-        checkDuplicateReview(addReviewRequest.ticketId());
         reviewRepository.save(addReviewRequest.toEntity(user, eventInfo));
         KafkaReviewRequest kafkaReviewRequest = new KafkaReviewRequest(
                 addReviewRequest.eventInfoId(),addReviewRequest.rating()
@@ -96,14 +96,6 @@ public class ReviewServiceImpl implements ReviewService{
         return eventInfo;
     }
 
-    private void checkDuplicateReview(Long ticketId) {
-//        if (reviewRepository.findByUserAndEventInfo(user, eventInfo) != null) {
-//            throw new DuplicateReviewException("해당 이벤트에 대한 리뷰가 이미 존재합니다.");
-//        }
-        if(reviewRepository.findByTicketId(ticketId) != null){
-            throw new DuplicateReviewException("해당 이벤트에 대한 리뷰가 이미 존재합니다.");
-        }
-    }
 
     private Review getValidReview(User user, Long reviewId) {
         Review review = reviewRepository.findByUserAndReviewId(user, reviewId);

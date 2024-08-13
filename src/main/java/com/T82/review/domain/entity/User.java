@@ -25,12 +25,25 @@ public class User {
     @Column(name = "EMAIL", nullable = false)
     private String email;
 
+    @Column(name = "USER_NAME", nullable = false)
+    private String username;
+
     @Column(name = "IS_DELETED", nullable = false)
     private Boolean isDeleted;
 
+    @Column(name = "IMAGE_URL")
+    private String ImageUrl;
+
+    @Column(name = "IS_ARTIST", nullable = false)
+    private Boolean isArtist;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
 //    @JsonManagedReference
-    private List<Review> review;
+    private List<Review> reviews;
+
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
+//    @JsonManagedReference
+    private List<Comment> comments;
 
     public void deleteUser() {
         this.isDeleted = true;
