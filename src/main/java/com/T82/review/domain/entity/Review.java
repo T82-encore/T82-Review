@@ -1,6 +1,6 @@
 package com.T82.review.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonBackReference;
+
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -8,6 +8,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 
 import java.time.LocalDate;
+import java.util.List;
 
 @Entity
 @Getter
@@ -46,11 +47,14 @@ public class Review {
     @Column(name = "CREATED_DATE", nullable = false)
     private LocalDate createdDate;
 
-    @Column(name = "TICKET_ID", nullable = false)
-    private Long ticketId;
+    @OneToMany(mappedBy = "review")
+    private List<Comment> comments;
+
     public void deleteReview() {
         this.isDeleted = true;
     }
+
+
 
 
 }
