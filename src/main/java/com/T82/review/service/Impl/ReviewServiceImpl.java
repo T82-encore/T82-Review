@@ -32,7 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final KafkaProducer kafkaProducer;
 
 //    리뷰 생성
-//    @CustomException(ErrorCode.FAILED_CREATE)  "생성 작업에 실패헀습니다."
+//    @CustomException(ErrorCode.FAILED_CREATE_REVIEW)  "리뷰 생성에 실패했습니다."
     @Override
     public void addReview(TokenInfo tokenInfo, AddReviewRequest addReviewRequest) {
         User user = getUser(tokenInfo);
@@ -46,7 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 //    모든 리뷰 가져오기
-//    @CustomException(ErrorCode.FAILED_INFO)  "정보 불러오기를 실패헀습니다."
+//    @CustomException(ErrorCode.FAILED_GET_REVIEW)  "리뷰 불러오기를 실패했습니다."
     @Override
     public List<ReviewResponse> getAllUserReview(TokenInfo tokenInfo) {
         User user = getUser(tokenInfo);
@@ -55,7 +55,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 //    한 이벤트에 대한 리뷰 가져오기
-//    @CustomException(ErrorCode.FAILED_INFO)  "정보 불러오기를 실패헀습니다."
+//    @CustomException(ErrorCode.FAILED_GET_REVIEW)  "리뷰 불러오기를 실패했습니다."
     @Override
     public List<ReviewResponse> getAllReview(Long eventInfoId) {
         EventInfo eventInfo = getValidEventInfo(eventInfoId);
@@ -64,7 +64,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 //    리뷰 삭제하기
-//    @CustomException(ErrorCode.FAILED_DELETE)  "삭제 작업에 실패헀습니다."
+//    @CustomException(ErrorCode.FAILED_DELETE_REVIEW)  "리뷰 삭제에 실패했습니다."
     @Override
     public void deleteReview(TokenInfo tokenInfo, Long reviewId) {
         User user = getUser(tokenInfo);
@@ -103,7 +103,6 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
-    //    @CustomException(ErrorCode.FAILED_KAFKA)  "Kafka 작업에 실패헀습니다."
     @KafkaListener(topics = "userTopic")
     public void handleUserSynchronization(KafkaStatus<KafkaUserRequest> status) {
         switch (status.status()) {
@@ -121,7 +120,6 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
-    //    @CustomException(ErrorCode.FAILED_KAFKA)  "Kafka 작업에 실패헀습니다."
     @KafkaListener(topics = "eventInfoTopic")
     public void handleEventSynchronization(KafkaStatus<Long> status) {
         switch (status.status()) {
