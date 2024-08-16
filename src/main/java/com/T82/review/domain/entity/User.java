@@ -1,6 +1,5 @@
 package com.T82.review.domain.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -18,7 +17,6 @@ import java.util.UUID;
 @Table(name = "Reviews_Users")
 public class User {
     @Id
-//    @GeneratedValue(strategy = GenerationType.UUID)
     @Column(name = "USER_ID", nullable = false)
     private UUID userId;
 
@@ -38,11 +36,9 @@ public class User {
     private Boolean isArtist;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonManagedReference
     private List<Review> reviews;
 
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
-//    @JsonManagedReference
     private List<Comment> comments;
 
     public void deleteUser() {

@@ -1,5 +1,8 @@
 package com.T82.review.service.Impl;
 
+import com.T82.common_exception.exception.review.ReviewNotFoundException;
+import com.T82.common_exception.exception.seat.EventInfoNotFoundException;
+import com.T82.common_exception.exception.user.UserNotFoundException;
 import com.T82.review.domain.dto.request.AddReviewRequest;
 import com.T82.review.domain.dto.response.ReviewResponse;
 import com.T82.review.domain.entity.EventInfo;
@@ -8,16 +11,11 @@ import com.T82.review.domain.entity.User;
 import com.T82.review.domain.repository.EventInfoRepository;
 import com.T82.review.domain.repository.ReviewRepository;
 import com.T82.review.domain.repository.UserRepository;
-import com.T82.review.exception.DuplicateReviewException;
-import com.T82.review.exception.EventDeleteException;
-import com.T82.review.exception.NoReviewException;
-import com.T82.review.exception.UserDeleteException;
 import com.T82.review.global.utils.TokenInfo;
 import com.T82.review.kafka.dto.KafkaStatus;
 import com.T82.review.kafka.dto.request.*;
 import com.T82.review.kafka.producer.KafkaProducer;
 import com.T82.review.service.ReviewService;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.RequiredArgsConstructor;
 import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
@@ -34,6 +32,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final KafkaProducer kafkaProducer;
 
 //    리뷰 생성
+//    @CustomException(ErrorCode.FAILED_CREATE)  "생성 작업에 실패헀습니다."
     @Override
     public void addReview(TokenInfo tokenInfo, AddReviewRequest addReviewRequest) {
         User user = getUser(tokenInfo);
@@ -47,6 +46,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 //    모든 리뷰 가져오기
+//    @CustomException(ErrorCode.FAILED_INFO)  "정보 불러오기를 실패헀습니다."
     @Override
     public List<ReviewResponse> getAllUserReview(TokenInfo tokenInfo) {
         User user = getUser(tokenInfo);
@@ -55,6 +55,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 //    한 이벤트에 대한 리뷰 가져오기
+//    @CustomException(ErrorCode.FAILED_INFO)  "정보 불러오기를 실패헀습니다."
     @Override
     public List<ReviewResponse> getAllReview(Long eventInfoId) {
         EventInfo eventInfo = getValidEventInfo(eventInfoId);
@@ -63,6 +64,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
 //    리뷰 삭제하기
+//    @CustomException(ErrorCode.FAILED_DELETE)  "삭제 작업에 실패헀습니다."
     @Override
     public void deleteReview(TokenInfo tokenInfo, Long reviewId) {
         User user = getUser(tokenInfo);
@@ -76,13 +78,10 @@ public class ReviewServiceImpl implements ReviewService {
 
     }
 
-
-
-
     private User getUser(TokenInfo tokenInfo) {
         User user = User.builder().userId(tokenInfo.id()).build();
         if(userRepository.findByUserId(user.getUserId()).getIsDeleted()){
-            throw new UserDeleteException("해당 회원은 탈퇴한 회원입니다.");
+            throw new UserNotFoundException();
         }
         return user;
     }
@@ -90,21 +89,21 @@ public class ReviewServiceImpl implements ReviewService {
     private EventInfo getValidEventInfo(Long eventInfoId) {
         EventInfo eventInfo = EventInfo.builder().eventInfoId(eventInfoId).build();
         if (eventInfoRepository.findByEventInfoId(eventInfo.getEventInfoId()).getIsDeleted()) {
-            throw new EventDeleteException("해당 이벤트는 삭제된 이벤트입니다.");
+            throw new EventInfoNotFoundException();
         }
         return eventInfo;
     }
 
-
     private Review getValidReview(User user, Long reviewId) {
         Review review = reviewRepository.findByUserAndReviewId(user, reviewId);
         if (review == null) {
-            throw new NoReviewException("해당 이벤트에 대한 리뷰가 존재하지 않습니다.");
+            throw new ReviewNotFoundException();
         }
         return review;
     }
 
     @Transactional
+    //    @CustomException(ErrorCode.FAILED_KAFKA)  "Kafka 작업에 실패헀습니다."
     @KafkaListener(topics = "userTopic")
     public void handleUserSynchronization(KafkaStatus<KafkaUserRequest> status) {
         switch (status.status()) {
@@ -122,6 +121,7 @@ public class ReviewServiceImpl implements ReviewService {
     }
 
     @Transactional
+    //    @CustomException(ErrorCode.FAILED_KAFKA)  "Kafka 작업에 실패헀습니다."
     @KafkaListener(topics = "eventInfoTopic")
     public void handleEventSynchronization(KafkaStatus<Long> status) {
         switch (status.status()) {
@@ -137,8 +137,4 @@ public class ReviewServiceImpl implements ReviewService {
                 System.out.println("Unknown status: " + status.status());
         }
     }
-
-
-
-
 }
