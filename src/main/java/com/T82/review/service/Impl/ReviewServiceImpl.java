@@ -33,6 +33,7 @@ public class ReviewServiceImpl implements ReviewService {
     private final EventInfoRepository eventInfoRepository;
     private final KafkaProducer kafkaProducer;
 
+
 //    리뷰 생성
     @Override
     public void addReview(TokenInfo tokenInfo, AddReviewRequest addReviewRequest) {
