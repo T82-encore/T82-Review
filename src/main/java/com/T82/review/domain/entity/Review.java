@@ -24,12 +24,10 @@ public class Review {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "USER_ID", nullable = false)
-//    @JsonBackReference
     private User user;
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "EVENT_INFO_ID", nullable = false)
-//    @JsonBackReference
     private EventInfo eventInfo;
 
     @Column(name = "CONTENT")
