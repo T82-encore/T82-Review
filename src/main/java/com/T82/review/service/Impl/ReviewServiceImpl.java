@@ -58,6 +58,7 @@ public class ReviewServiceImpl implements ReviewService {
 //    한 이벤트에 대한 리뷰 가져오기
     @Override
     public List<ReviewResponse> getAllReview(Long eventInfoId) {
+        System.out.println("testtestetsetsdf");
         EventInfo eventInfo = getValidEventInfo(eventInfoId);
         List<Review> allByEventInfo = reviewRepository.findAllByEventInfoAndIsDeleted(eventInfo, false);
         return allByEventInfo.stream().map(ReviewResponse::from).toList();

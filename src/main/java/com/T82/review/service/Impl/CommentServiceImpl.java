@@ -24,6 +24,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final ReviewRepository reviewRepository;
     private final UserRepository userRepository;
+
     @Override
     public void createComment(Long reviewId, TokenInfo tokenInfo, CommentCreateRequest commentCreateRequest) {
        User user = getUser(tokenInfo);
