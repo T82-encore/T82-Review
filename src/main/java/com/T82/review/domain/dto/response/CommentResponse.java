@@ -22,6 +22,7 @@ public record CommentResponse(Long commentId,
 
     public static CommentResponse from(Comment comment){
         return CommentResponse.builder()
+                .commentId(comment.getCommentId())
                 .content(comment.getContent())
                 .isDeleted(comment.getIsDeleted())
                 .createdDate(comment.getCreatedDate())
